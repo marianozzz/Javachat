@@ -1,0 +1,79 @@
+import java.io.*;
+import java.net.*;
+
+
+public class Servidor implements Runnable {
+	
+	private ServerSocket ss;
+	private Socket s; //para abrir una conexion con el cliente
+	private ObjectOutputStream  oos; //se usa para enviar objetos
+	private ObjectInputStream   ois;//se usa para recibir
+	
+	private MainWindow mw;
+	
+	public Servidor(MainWindow mw) {
+	this.mw=mw;
+	}
+
+
+	
+	public void run() {
+		try {
+			ss = new ServerSocket(9998);
+			s =ss.accept();//hasta que el cliente no se conecte el programa queda tilado en esta linea
+			oos= new ObjectOutputStream(s.getOutputStream());
+			ois = new ObjectInputStream(s.getInputStream());
+			mw.getAreaChat().append("Conexion Exitosa");
+			this.readLine();
+			//System.out.println("Conexion exitosa");
+			
+		} catch (Exception ex) {
+			this.closeServer();
+			ex.printStackTrace();
+		}
+		
+	}
+	
+	public void writeLine(String linea) {
+		try {
+			oos.writeObject(linea);
+			
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+
+
+		}
+	}
+	
+	public void readLine() {
+		try {
+			while(true) {
+				Object aux = ois.readObject();
+				if(aux != null && aux instanceof String) {
+					mw.getAreaChat().append("\nEl cliente dice: "+(String) aux);
+				}
+					Thread.sleep(15);
+			}
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	public void closeServer() {
+		try {
+			oos.close();
+			ois.close();
+			s.close();
+			ss.close();
+			
+		} 
+		catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		
+	}
+
+}
