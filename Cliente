@@ -1,0 +1,73 @@
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+
+public class Cliente  implements Runnable{
+	
+	    private Socket s;
+	    private ObjectOutputStream oos;
+		private ObjectInputStream ois;
+		private MainWindow mw;
+	
+	public Cliente(MainWindow mw) {
+		this.mw=mw;
+
+	}
+
+	
+	public void run() {
+		
+		try {
+			s=new Socket("localhost",9998);
+			oos= new ObjectOutputStream(s.getOutputStream());
+			ois = new ObjectInputStream(s.getInputStream());
+			mw.getAreaChat().append("Conexion Exitosa");
+			this.readLine(); //lee lo que se escribe lo mismo para el server
+			//System.out.println("Conexion exitosa");
+			
+			
+		} catch (Exception ex) {
+			this.close();
+			ex.printStackTrace();
+		}
+	}
+	public void close() {
+		try {
+			oos.close();
+			ois.close();
+			s.close();
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	public void writeLine(String linea) {
+		try {
+			oos.writeObject(linea);
+			
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+
+
+		}
+	}
+	
+	public void readLine() {
+		try {
+			while(true) {
+				Object aux = ois.readObject();
+				if(aux != null && aux instanceof String) {
+					mw.getAreaChat().append("\nEl Servidor dice: "+(String) aux);
+				}
+					Thread.sleep(15);
+			}
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+
+}
